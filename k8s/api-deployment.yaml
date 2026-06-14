@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intellmeet-api
+  labels:
+    app: intellmeet-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: intellmeet-api
+  template:
+    metadata:
+      labels:
+        app: intellmeet-api
+    spec:
+      containers:
+      - name: intellmeet-api
+        image: intellmeet/api:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGO_URI
+          value: "mongodb://mongo:27017/intellmeet"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: intellmeet-secrets
+              key: JWT_SECRET
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intellmeet-api-service
+spec:
+  type: ClusterIP
+  selector:
+    app: intellmeet-api
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
